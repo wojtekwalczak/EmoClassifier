@@ -12,6 +12,8 @@ import msgpack
 
 from collections import defaultdict
 
+from feature_extraction import FeatureExtraction
+
 emoticons = {
    'pos':  [u':-)', u':)',  u':o)', u':]', u':3', u':c)',
             u':>',  u'=]',  u'8)',  u'=)', u':}', u':^)', u':っ)',
@@ -36,22 +38,22 @@ emoticons = {
 
 
 
-class _EmoClassifier(object):
+class _EmoClassifier(FeatureExtraction):
 
    def _init(self, words_fn=None, bigrams_fn=None, trigrams_fn=None,
                    terms_by_root_form_fn=None,
                    use_emoticons=False):
       if words_fn:
          words = self._csv_to_dict(words_fn)
-         self.words_cls = self._train(words, 'word')
+         self.words_cls = self._train(words)
 
       if bigrams_fn:
          bigrams = self._csv_to_dict(bigrams_fn)
-         self.bigrams_cls = self._train(bigrams, 'bigram')
+         self.bigrams_cls = self._train(bigrams)
 
       if trigrams_fn:
          trigrams = self._csv_to_dict(trigrams_fn)
-         self.trigrams_cls = self._train(trigrams, 'trigram')
+         self.trigrams_cls = self._train(trigrams)
 
       if terms_by_root_form_fn:
          w = gzip.open(terms_by_root_form_fn)
@@ -71,15 +73,21 @@ class _EmoClassifier(object):
             self.emo_re[emo] = re.compile(u'|'.join(patterns), re.UNICODE)
 
 
-   def _train(self, data, feature_type):
+   def _train(self, data):
       train_set = []
       for emo in data:
          for aterm in data[emo]:
             freq = int(data[emo][aterm])
-            feat_freq = [({ feature_type: aterm }, emo) for i in range(freq)]
+            feat_freq = [({ aterm: True }, emo) for i in range(freq)]
             train_set.extend(feat_freq)
       cls = nltk.NaiveBayesClassifier.train(train_set)
       return cls
+
+
+   def _predict(self, sent):
+      return { 'terms': self.extract_terms(sent),
+               'bigrams': self.extract_bigrams(sent),
+               'trigrams': self.extract_trigrams(sent) }
 
 
    def _dump_cls(self, cls, fn):
@@ -126,3 +134,7 @@ class EmoClassifier(_EmoClassifier):
       self._init(words_fn, bigrams_fn, trigrams_fn,
                  terms_by_root_form_fn,
                  use_emoticons)
+
+
+   def predict(self, sent):
+      return self._predict(sent)
