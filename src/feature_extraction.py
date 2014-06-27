@@ -14,11 +14,13 @@ from nltk.collocations import (BigramAssocMeasures,
 
 class _FeatureExtraction(object):
 
-   def _preprocess_sent(self, sent):
+   def _preprocess_sent(self, sent, return_list=False):
       sent = self._normalize_sentence(sent)
       sent = self._reduce_extended_chars(sent)
       sent = self._stem_sentence(sent)
-      return self._extract_words(sent)
+      if return_list:
+         return self._extract_words(sent)
+      return { i: True for i in self._extract_words(sent) }
 
 
    def _extract_words(self, sent):
@@ -76,17 +78,17 @@ class FeatureExtraction(_FeatureExtraction):
 
 
    def extract_bigrams(self, sent):
-      sent = self._preprocess_sent(sent)
+      sent = self._preprocess_sent(sent, return_list=True)
       bigram_measures = BigramAssocMeasures()
       BiFinder = BigramCollocationFinder.from_words(sent)
       bigrams = BiFinder.nbest(bigram_measures.pmi, 10000)
-      return bigrams
+      return { ' '.join(i): True for i in bigrams }
 
 
    def extract_trigrams(self, sent):
-      sent = self._preprocess_sent(sent)
+      sent = self._preprocess_sent(sent, return_list=True)
       trigram_measures = TrigramAssocMeasures()
       TriFinder = TrigramCollocationFinder.from_words(sent)
       trigrams = TriFinder.nbest(trigram_measures.pmi, 10000)
-      return trigrams
+      return { ' '.join(i): True for i in trigrams }
 

@@ -84,10 +84,47 @@ class _EmoClassifier(FeatureExtraction):
       return cls
 
 
-   def _predict(self, sent):
-      return { 'terms': self.extract_terms(sent),
-               'bigrams': self.extract_bigrams(sent),
-               'trigrams': self.extract_trigrams(sent) }
+   def _generic_classify(self, sent, cls, extract_func, what):
+      if not cls:
+         return None
+
+      feats = extract_func(sent)
+      terms_probdist = cls.prob_classify(feats)
+
+      if self.verbose:
+         print " - %s: 'pos' probability: %.2f; 'neg' probability: %.2f"\
+                 % (what,
+                    terms_probdist.prob('pos'),
+                    terms_probdist.prob('neg'))
+
+      return terms_probdist.max()
+
+
+   def _classify_terms(self, sent):
+      return self._generic_classify(sent,
+                                    self.terms_cls,
+                                    self.extract_terms,
+                                    'terms')
+
+
+   def _classify_bigrams(self, sent):
+      return self._generic_classify(sent,
+                                    self.bigrams_cls,
+                                    self.extract_bigrams,
+                                    'bigrams')
+
+
+   def _classify_trigrams(self, sent):
+      return self._generic_classify(sent,
+                                    self.trigrams_cls,
+                                    self.extract_terms,
+                                    'trigrams')
+
+
+   def _classify(self, sent):
+      return (self._classify_terms(sent),
+              self._classify_bigrams(sent),
+              self._classify_trigrams(sent))
 
 
    def _dump_cls(self, cls, fn):
@@ -121,7 +158,8 @@ class EmoClassifier(_EmoClassifier):
                       bigrams_fn=None,
                       trigrams_fn=None,
                       terms_by_root_form_fn=None,
-                      use_emoticons=True):
+                      use_emoticons=True,
+                      verbose=True):
       self.terms_cls = None
       self.bigrams_cls = None
       self.trigrams_cls = None
@@ -131,10 +169,12 @@ class EmoClassifier(_EmoClassifier):
       self.terms_by_root_form = None
       self.allterms = None
 
+      self.verbose = verbose
+
       self._init(terms_fn, bigrams_fn, trigrams_fn,
                  terms_by_root_form_fn,
                  use_emoticons)
 
 
-   def predict(self, sent):
-      return self._predict(sent)
+   def classify(self, sent):
+      return self._classify(sent)

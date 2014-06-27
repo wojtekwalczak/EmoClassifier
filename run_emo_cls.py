@@ -14,15 +14,14 @@ if __name__ == '__main__':
    e.bigrams_cls.show_most_informative_features(10)
    e.trigrams_cls.show_most_informative_features(10)
 
-   example_sents = ( (u'Czuję się dziś bardzo dobrze'),
+   example_sents = ( (u'Było super, nie wyobrażam sobie lepszych wakacji'),
                      (u'To chyba najlepszy kabaret jaki oglądałem'),
+                     (u'Wszystkiego najlepszego i wesołych świąt'),
                      (u'Niestety, mieliśmy dużego pecha i przegraliśmy'),
-                     (u'Zachorowałem i leżę w łóżku') )
+                     (u'Zachorowałem i leżę w łóżku'),
+                     (u'To bardzo smutna wiadomość, nie mogę tego zrozumieć'))
 
    for sent in example_sents:
-      res = e.predict(sent)
       print 'Sentence:', sent
-      print '  ->', res.get('terms', '')
-      print '  ->', res.get('bigrams', '')
-      print '  ->', res.get('trigrams', '')
-      print '-'*80
+      res = e.classify(sent)
+      print
