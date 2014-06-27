@@ -25,7 +25,8 @@ example_sents = ( (u'Było super, nie wyobrażam sobie lepszych wakacji'),
 for sent in example_sents:
    print 'Sentence:', sent
    res = e.classify(sent)
-   print```
+   print
+```
 
 Output:
 
@@ -58,4 +59,5 @@ Sentence: Zachorowałem i leżę w łóżku
 Sentence: To bardzo smutna wiadomość, nie mogę tego zrozumieć
  - terms: 'pos' probability: 0.03; 'neg' probability: 0.97
  - bigrams: 'pos' probability: 0.00; 'neg' probability: 1.00
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65```
+ - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
+```
