@@ -40,12 +40,12 @@ emoticons = {
 
 class _EmoClassifier(FeatureExtraction):
 
-   def _init(self, words_fn=None, bigrams_fn=None, trigrams_fn=None,
+   def _init(self, terms_fn=None, bigrams_fn=None, trigrams_fn=None,
                    terms_by_root_form_fn=None,
                    use_emoticons=False):
-      if words_fn:
-         words = self._csv_to_dict(words_fn)
-         self.words_cls = self._train(words)
+      if terms_fn:
+         terms = self._csv_to_dict(terms_fn)
+         self.terms_cls = self._train(terms)
 
       if bigrams_fn:
          bigrams = self._csv_to_dict(bigrams_fn)
@@ -117,12 +117,12 @@ class _EmoClassifier(FeatureExtraction):
 
 
 class EmoClassifier(_EmoClassifier):
-   def __init__(self, words_fn=None,
+   def __init__(self, terms_fn=None,
                       bigrams_fn=None,
                       trigrams_fn=None,
                       terms_by_root_form_fn=None,
                       use_emoticons=True):
-      self.words_cls = None
+      self.terms_cls = None
       self.bigrams_cls = None
       self.trigrams_cls = None
 
@@ -131,7 +131,7 @@ class EmoClassifier(_EmoClassifier):
       self.terms_by_root_form = None
       self.allterms = None
 
-      self._init(words_fn, bigrams_fn, trigrams_fn,
+      self._init(terms_fn, bigrams_fn, trigrams_fn,
                  terms_by_root_form_fn,
                  use_emoticons)
 
