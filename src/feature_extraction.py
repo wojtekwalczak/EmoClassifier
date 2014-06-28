@@ -42,6 +42,7 @@ class _FeatureExtraction(object):
       """
          Replace diacritics with regular characters.
       """
+      sent = sent.lower().replace(u'ł', u'l')
       t1 = None
       try:
          t1 = normalize('NFD', sent)
@@ -69,7 +70,7 @@ class _FeatureExtraction(object):
       for aword_raw in self._extract_words(sent):
          stemmed = self._stem_term(aword_raw)
          if stemmed != aword_raw:
-            stemmed_sent = re.sub(aword_raw, stemmed, sent)
+            stemmed_sent = re.sub(aword_raw, stemmed, stemmed_sent)
       return stemmed_sent
 
 
