@@ -8,7 +8,9 @@ if __name__ == '__main__':
                      bigrams_fn='data/corpuses/bigrams_raw.csv.gz',
                      trigrams_fn='data/corpuses/trigrams_raw.csv.gz',
                      terms_by_root_form_fn='data/terms_by_root_form.msg.gz',
-                     use_emoticons=True)
+                     is_use_emoticons=True,
+                     is_dump_cls=True,
+                     is_load_cached_cls=True)
 
    e.terms_cls.show_most_informative_features(10)
    e.bigrams_cls.show_most_informative_features(10)

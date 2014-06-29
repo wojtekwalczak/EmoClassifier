@@ -12,10 +12,13 @@ import nltk
 import gzip
 import cPickle
 import msgpack
+import os.path
 
 from collections import defaultdict
 
 from feature_extraction import FeatureExtraction
+from ec_settings import TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR
+
 
 emoticons = {
    'pos':  [u':-)', u':)',  u':o)', u':]', u':3', u':c)',
@@ -40,23 +43,110 @@ emoticons = {
 }
 
 
+class _ClsCache(Object)
 
-class _EmoClassifier(FeatureExtraction):
+   def _dump_cls(self, cls, fn):
+      """
+         Dump the classifier 'cls' to a pickle named 'fn'.
+      """
+      w = gzip.open(fn, 'wb')
+      cPickle.dump(cls, w, 1)
+      w.close()
+
+   def _dump_terms_cls(self, fn=TERMS_CLS_DIR):
+      self._dump_cls(self.terms_cls, fn)
+
+   def _dump_bigrams_cls(self, fn=BIGRAMS_CLS_DIR):
+      self._dump_cls(self.bigrams_cls, fn)
+
+   def _dump_trigrams_cls(self, fn=TRIGRAMS_CLS_DIR):
+      self._dump_cls(self.trigrams_cls, fn)
+
+
+   def _load_cls(self, fn):
+      if not os.path.exists(fn):
+         return None
+      w = gzip.open(fn, 'rb')
+      cls = cPickle.load(w)
+      w.close()
+      return cls
+
+   def _load_terms_cls(self, fn=TERMS_CLS_DIR):
+      return self._load_cls(fn)
+
+   def _load_bigrams_cls(self, fn=BIGRAMS_CLS_DIR):
+      return self._load_cls(fn)
+
+   def _load_trigrams_cls(self, fn=TRIGRAMS_CLS_DIR):
+      return self._load_cls(fn)
+
+
+class _ReadCorpus(object):
+
+   def _csv_to_dict(self, fn):
+      """
+         Read in the contents of a CSV file and place the contents
+         in a dict of dicts.
+
+         The CSV file is supposed to be of a form:
+
+         val_1,val_2,val_3
+
+         where:
+          - 'val_1' is a type of emotion ('pos'/'neg')
+          - 'val_2' is a term (bigram/trigram etc.)
+          - 'val_3' is a frequency of occurence of 'val_2'
+            in the context of 'val_1'
+      """
+      raw_data = self._read_csv(fn)
+      data = defaultdict(lambda: defaultdict(int))
+      for aline in raw_data:
+         emo, term, freq = aline
+         data[emo][term] = freq
+      return data
+
+
+   def _read_csv(self, fn):
+      csv_f = gzip.open(fn)
+      csv_reader = csv.reader(csv_f)
+      data = []
+      for arow in csv_reader:
+         data.append(arow)
+      csv_f.close()
+      return data
+
+
+
+class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
 
    def _init(self, terms_fn=None, bigrams_fn=None, trigrams_fn=None,
                    terms_by_root_form_fn=None,
-                   use_emoticons=False):
-      if terms_fn:
+                   is_use_emoticons=False,
+                   is_dump_cls=False,
+                   is_load_cached_cls=False):
+
+      if is_load_cached_cls:
+         self.terms_cls = self._load_terms_cls()
+         self.bigrams_cls = self._load_bigrams_cls()
+         self.trigrams_cls = self._load_trigrams_cls()
+
+      if terms_fn and not self.terms_cls:
          terms = self._csv_to_dict(terms_fn)
          self.terms_cls = self._train(terms)
+         if is_dump_cls:
+            self._dump_terms_cls()
 
-      if bigrams_fn:
+      if bigrams_fn and not self.bigrams_cls:
          bigrams = self._csv_to_dict(bigrams_fn)
          self.bigrams_cls = self._train(bigrams)
+         if is_dump_cls:
+            self._dump_bigrams_cls()
 
-      if trigrams_fn:
+      if trigrams_fn and not self.trigrams_cls:
          trigrams = self._csv_to_dict(trigrams_fn)
          self.trigrams_cls = self._train(trigrams)
+         if is_dump_cls:
+            self._dump_trigrams_cls()
 
       if terms_by_root_form_fn:
          w = gzip.open(terms_by_root_form_fn)
@@ -71,7 +161,7 @@ class _EmoClassifier(FeatureExtraction):
             for aterm in self._terms_by_root_form[aroot]:
                self._allterms.add(aterm)
 
-      if use_emoticons:
+      if is_use_emoticons:
          self._emo_re = {}
          for emo, pattern in emoticons.items():
             patterns = [re.escape(i) for i in pattern]
@@ -132,46 +222,6 @@ class _EmoClassifier(FeatureExtraction):
               self._classify_trigrams(sent))
 
 
-   def _dump_cls(self, cls, fn):
-      """
-         Dump the classifier 'cls' to a pickle named 'fn'.
-      """
-      w = gzip.open(fn, 'wb')
-      cPickle.dump(cls, w, -1)
-      w.close()
-
-
-   def _read_csv(self, fn):
-      csv_f = gzip.open(fn)
-      csv_reader = csv.reader(csv_f)
-      data = []
-      for arow in csv_reader:
-         data.append(arow)
-      csv_f.close()
-      return data
-
-
-   def _csv_to_dict(self, fn):
-      """
-         Read in the contents of a CSV file and place the contents
-         in a dict of dicts.
-
-         The CSV file is supposed to be of a form:
-
-         val_1,val_2,val_3
-
-         where:
-          - 'val_1' is a type of emotion ('pos'/'neg')
-          - 'val_2' is a term (bigram/trigram etc.)
-          - 'val_3' is a frequency of occurence of 'val_2'
-            in the context of 'val_1'
-      """
-      raw_data = self._read_csv(fn)
-      data = defaultdict(lambda: defaultdict(int))
-      for aline in raw_data:
-         emo, term, freq = aline
-         data[emo][term] = freq
-      return data
 
 
 
@@ -185,9 +235,12 @@ class EmoClassifier(_EmoClassifier):
        trigrams_fn (str)           - a file path to the trigrams corpus
        terms_by_root_form_fn (str) - a file path to the dictionary of word
                                      forms (root + inflections)
-       use_emoticons (bool)        - if 'True' uses emoticons to classify
+       is_use_emoticons (bool)     - if 'True', uses emoticons to classify
                                      the emotional affinity of sentences
-       verbose (bool)              - if True, be talkative
+       is_load_cached_cls (bool)   - if 'True', loads classifiers from cache
+                                     instead of training them
+       is_dump_cls (bool)          - if 'True', dumps trained classifiers
+       verbose (bool)              - if 'True', be talkative
 
 
       Class attributes:
@@ -204,7 +257,9 @@ class EmoClassifier(_EmoClassifier):
                       bigrams_fn=None,
                       trigrams_fn=None,
                       terms_by_root_form_fn=None,
-                      use_emoticons=True,
+                      is_use_emoticons=True,
+                      is_load_cached_cls=False,
+                      is_dump_cls=False,
                       verbose=True):
       self.terms_cls = None
       self.bigrams_cls = None
@@ -219,7 +274,9 @@ class EmoClassifier(_EmoClassifier):
 
       self._init(terms_fn, bigrams_fn, trigrams_fn,
                  terms_by_root_form_fn,
-                 use_emoticons)
+                 is_use_emoticons=is_use_emoticons,
+                 is_dump_cls=is_dump_cls,
+                 is_load_cached_cls=is_load_cached_cls)
 
 
    def classify(self, sent):
