@@ -43,7 +43,7 @@ emoticons = {
 }
 
 
-class _ClsCache(Object)
+class _ClsCache(object):
 
    def _dump_cls(self, cls, fn):
       """
