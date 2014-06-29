@@ -60,7 +60,7 @@ class _EmoClassifier(FeatureExtraction):
 
       if terms_by_root_form_fn:
          w = gzip.open(terms_by_root_form_fn)
-         self._terms_by_root_form = msgpack.unpack(w)
+         self._terms_by_root_form = msgpack.unpack(w, encoding='utf-8')
          w.close()
 
          # create a set of all terms from 'self._terms_by_root_form'
