@@ -122,7 +122,7 @@ class _EmoClassifier(FeatureExtraction):
    def _classify_trigrams(self, sent):
       return self._generic_classify(sent,
                                     self.trigrams_cls,
-                                    self.extract_terms,
+                                    self.extract_trigrams,
                                     'trigrams')
 
 
