@@ -17,14 +17,12 @@ from nltk.collocations import (BigramAssocMeasures,
 
 class _FeatureExtraction(object):
 
-   def _preprocess_sent(self, sent, return_list=False):
+   def _preprocess_sent(self, sent):
       sent = sent.lower().strip()
       sent = self._normalize_sentence(sent)
       sent = self._reduce_extended_chars(sent)
       sent = self._stem_sentence(sent)
-      if return_list:
-         return self._extract_words(sent)
-      return { i: True for i in self._extract_words(sent) }
+      return self._extract_words(sent)
 
 
    def _extract_words(self, sent):
@@ -103,21 +101,27 @@ class FeatureExtraction(_FeatureExtraction):
 
 
    def extract_terms(self, sent):
-      return self._preprocess_sent(sent)
+      terms = set(self._preprocess_sent(sent))
+      terms = terms & self._terms_set
+      return { i: True for i in terms }
 
 
    def extract_bigrams(self, sent):
-      sent = self._preprocess_sent(sent, return_list=True)
+      sent = self._preprocess_sent(sent)
       bigram_measures = BigramAssocMeasures()
       BiFinder = BigramCollocationFinder.from_words(sent)
       bigrams = BiFinder.nbest(bigram_measures.pmi, 10000)
-      return { ' '.join(i): True for i in bigrams }
+      bigrams = set([' '.join(i) for i in bigrams])
+      bigrams = bigrams & self._bigrams_set
+      return { i: True for i in bigrams }
 
 
    def extract_trigrams(self, sent):
-      sent = self._preprocess_sent(sent, return_list=True)
+      sent = self._preprocess_sent(sent)
       trigram_measures = TrigramAssocMeasures()
       TriFinder = TrigramCollocationFinder.from_words(sent)
       trigrams = TriFinder.nbest(trigram_measures.pmi, 10000)
-      return { ' '.join(i): True for i in trigrams }
+      trigrams = set([' '.join(i) for i in trigrams])
+      trigrams = trigrams & self._trigrams_set
+      return { i: True for i in trigrams }
 

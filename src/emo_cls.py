@@ -97,13 +97,19 @@ class _ReadCorpus(object):
           - 'val_2' is a term (bigram/trigram etc.)
           - 'val_3' is a frequency of occurence of 'val_2'
             in the context of 'val_1'
+
+         Return a tuple of two values:
+          - a dict of dicts: adict[val_1][val_2] = val_3
+          - a tuple of all val_2s (ie. terms/bigrams/trigrams)
       """
+      terms = set([])
       raw_data = self._read_csv(fn)
       data = defaultdict(lambda: defaultdict(int))
       for aline in raw_data:
          emo, term, freq = aline
          data[emo][term] = freq
-      return data
+         terms.add(term)
+      return data, terms
 
 
    def _read_csv(self, fn):
@@ -125,25 +131,26 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
                    is_dump_cls=False,
                    is_load_cached_cls=False):
 
+      terms, self._terms_set = self._csv_to_dict(terms_fn)
+      bigrams, self._bigrams_set = self._csv_to_dict(bigrams_fn)
+      trigrams, self._trigrams_set = self._csv_to_dict(trigrams_fn)
+
       if is_load_cached_cls:
          self.terms_cls = self._load_terms_cls()
          self.bigrams_cls = self._load_bigrams_cls()
          self.trigrams_cls = self._load_trigrams_cls()
 
       if terms_fn and not self.terms_cls:
-         terms = self._csv_to_dict(terms_fn)
          self.terms_cls = self._train(terms)
          if is_dump_cls:
             self._dump_terms_cls()
 
       if bigrams_fn and not self.bigrams_cls:
-         bigrams = self._csv_to_dict(bigrams_fn)
          self.bigrams_cls = self._train(bigrams)
          if is_dump_cls:
             self._dump_bigrams_cls()
 
       if trigrams_fn and not self.trigrams_cls:
-         trigrams = self._csv_to_dict(trigrams_fn)
          self.trigrams_cls = self._train(trigrams)
          if is_dump_cls:
             self._dump_trigrams_cls()
@@ -184,6 +191,8 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
          return None
 
       feats = extract_func(sent)
+      if not feats:
+         return '---'
       terms_probdist = cls.prob_classify(feats)
 
       if self._verbose:
@@ -261,6 +270,10 @@ class EmoClassifier(_EmoClassifier):
                       is_load_cached_cls=False,
                       is_dump_cls=False,
                       verbose=True):
+      self._terms_set = None
+      self._bigrams_set = None
+      self._trigrams_set = None
+
       self.terms_cls = None
       self.bigrams_cls = None
       self.trigrams_cls = None

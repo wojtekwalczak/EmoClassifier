@@ -33,38 +33,32 @@ Output:
 
 ```
 Sentence: Było super, nie wyobrażam sobie lepszych wakacji
- - terms: 'pos' probability: 0.49; 'neg' probability: 0.51
- - bigrams: 'pos' probability: 0.44; 'neg' probability: 0.56
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
-Classified as: ('neg', 'neg', 'neg')
+ - terms: 'pos' probability: 0.77; 'neg' probability: 0.23
+ - bigrams: 'pos' probability: 0.56; 'neg' probability: 0.44
+ - trigrams: 'pos' probability: 0.39; 'neg' probability: 0.61
+Classified as: ('pos', 'pos', 'neg')
 
 Sentence: To chyba najlepszy kabaret jaki oglądałem
- - terms: 'pos' probability: 0.91; 'neg' probability: 0.09
+ - terms: 'pos' probability: 0.90; 'neg' probability: 0.10
  - bigrams: 'pos' probability: 0.39; 'neg' probability: 0.61
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
-Classified as: ('pos', 'neg', 'neg')
+Classified as: ('pos', 'neg', '---')
 
 Sentence: Wszystkiego najlepszego i wesołych świąt
  - terms: 'pos' probability: 1.00; 'neg' probability: 0.00
  - bigrams: 'pos' probability: 1.00; 'neg' probability: 0.00
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
-Classified as: ('pos', 'pos', 'neg')
+Classified as: ('pos', 'pos', '---')
 
 Sentence: Niestety, mieliśmy dużego pecha i przegraliśmy
- - terms: 'pos' probability: 0.02; 'neg' probability: 0.98
- - bigrams: 'pos' probability: 0.39; 'neg' probability: 0.61
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
-Classified as: ('neg', 'neg', 'neg')
+ - terms: 'pos' probability: 0.04; 'neg' probability: 0.96
+Classified as: ('neg', '---', '---')
 
 Sentence: Zachorowałem i leżę w łóżku
- - terms: 'pos' probability: 0.05; 'neg' probability: 0.95
- - bigrams: 'pos' probability: 0.39; 'neg' probability: 0.61
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
-Classified as: ('neg', 'neg', 'neg')
+ - terms: 'pos' probability: 0.12; 'neg' probability: 0.88
+Classified as: ('neg', '---', '---')
 
 Sentence: To bardzo smutna wiadomość, nie mogę tego zrozumieć
- - terms: 'pos' probability: 0.03; 'neg' probability: 0.97
+ - terms: 'pos' probability: 0.04; 'neg' probability: 0.96
  - bigrams: 'pos' probability: 0.00; 'neg' probability: 1.00
- - trigrams: 'pos' probability: 0.35; 'neg' probability: 0.65
+ - trigrams: 'pos' probability: 0.06; 'neg' probability: 0.94
 Classified as: ('neg', 'neg', 'neg')
 ```
