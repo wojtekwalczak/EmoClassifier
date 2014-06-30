@@ -18,7 +18,9 @@ example_sents = ( (u'Było super, nie wyobrażam sobie lepszych wakacji'),
                   (u'Niestety, mieliśmy dużego pecha i przegraliśmy'),
                   (u'Zachorowałem i leżę w łóżku'),
                   (u'To bardzo smutna wiadomość, nie mogę tego zrozumieć'),
-                  (u'Zxcjhgoiu ooijasddnakjz zczxnzbxcz qdqdqqfefw sdsdfsdfsdf'))
+                  (u'Zxcjhgoiu ooijasddnakjz zczxnzbxcz qdqdqqfefw sdsdfsdfsdf'),
+                  (u'Przystojniaczek! :-) :D :('))
+
 
 for sent in example_sents:
    print 'Sentence:', sent
@@ -61,4 +63,9 @@ Classified as: neg (0.97)
 
 Sentence: Zxcjhgoiu ooijasddnakjz zczxnzbxcz qdqdqqfefw sdsdfsdfsdf
 Classified as: --- (1.00)
+
+Sentence: Przystojniaczek! :-) :D :(
+ - terms: 'pos' probability: 0.90; 'neg' probability: 0.10
+ - emoticons: 'pos' probability: 0.67; 'neg' probability: 0.33
+Classified as: pos (0.78)
 ```
