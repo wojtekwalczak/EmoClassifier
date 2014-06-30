@@ -18,7 +18,8 @@ if __name__ == '__main__':
                      (u'Niestety, mieliśmy dużego pecha i przegraliśmy'),
                      (u'Zachorowałem i leżę w łóżku'),
                      (u'To bardzo smutna wiadomość, nie mogę tego zrozumieć'),
-                     (u'Zxcjhgoiu ooijasddnakjz zczxnzbxcz qdqdqqfefw sdsdfsdfsdf'))
+                     (u'Zxcjhgoiu ooijasddnakjz zczxnzbxcz qdqdqqfefw sdsdfsdfsdf'),
+                     (u'Przystojniaczek! :-) :D :('))
 
    for sent in example_sents:
       print 'Sentence:', sent

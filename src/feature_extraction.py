@@ -13,6 +13,33 @@ from nltk.collocations import (BigramAssocMeasures,
                                BigramCollocationFinder,
                                TrigramCollocationFinder)
 
+emoticons = {
+   'pos':  [u':-)', u':)',  u':o)', u':]', u':3', u':c)',
+            u':>',  u'=]',  u'8)',  u'=)', u':}', u':^)', u':っ)',
+            u':-D', u':D',  u'8-D', u'8D', u'x-D', u'xD', u'X-D',
+            u'XD',  u'=-D', u'=D',  u'=-3', u'=3', u'B^D',
+            u":'-)", u":')", # tears of happiness
+            u'<3',
+            u';-)', u';)', u'*-)', u'*)', u';-]', u';]', # wink
+            u';D', u';^)', u':-,',
+           ],
+
+   'neg': [u'>:[', u':-(', u':(', u':-c', u':c', u':-<', u':っC',
+           u':<',  u':-[', u':[', u':{',
+           u":'-(", u":'(", # crying
+           u':-|', u':@', u'>:(', # angry
+           u'>:\\', u'>:/', u':-/', u':-.', u':/', u':\\', # skeptical
+           u'=/', u'=\\',
+           u':L', u'=L', u':S', u'>.<',
+          ],
+
+}
+
+
+emo_re = {}
+for emo, pattern in emoticons.items():
+   patterns = [re.escape(i) for i in pattern]
+   emo_re[emo] = re.compile(u'|'.join(patterns), re.UNICODE)
 
 
 class _FeatureExtraction(object):
@@ -96,8 +123,8 @@ class _FeatureExtraction(object):
 
 class FeatureExtraction(_FeatureExtraction):
 
-   def extract_emoticons(self, sent):
-      pass
+   def extract_emoticons(self, sent, atype):
+      return re.findall(emo_re[atype], sent)
 
 
    def extract_terms(self, sent):

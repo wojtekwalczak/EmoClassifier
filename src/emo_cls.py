@@ -16,34 +16,14 @@ import os.path
 
 from collections import defaultdict
 
-from feature_extraction import FeatureExtraction
+from feature_extraction import FeatureExtraction, emoticons
 from ec_settings import (NO_CLASS,
                          TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR,
                          TERMS_FN, BIGRAMS_FN, TRIGRAMS_FN,
                          TERMS_BY_ROOT_FORM_FN)
 
 
-emoticons = {
-   'pos':  [u':-)', u':)',  u':o)', u':]', u':3', u':c)',
-            u':>',  u'=]',  u'8)',  u'=)', u':}', u':^)', u':っ)',
-            u':-D', u':D',  u'8-D', u'8D', u'x-D', u'xD', u'X-D',
-            u'XD',  u'=-D', u'=D',  u'=-3', u'=3', u'B^D',
-            u":'-)", u":')", # tears of happiness
-            u'<3',
-            u';-)', u';)', u'*-)', u'*)', u';-]', u';]', # wink
-            u';D', u';^)', u':-,',
-           ],
-
-   'neg': [u'>:[', u':-(', u':(', u':-c', u':c', u':-<', u':っC',
-           u':<',  u':-[', u':[', u':{',
-           u":'-(", u":'(", # crying
-           u':-|', u':@', u'>:(', # angry
-           u'>:\\', u'>:/', u':-/', u':-.', u':/', u':\\', # skeptical
-           u'=/', u'=\\',
-           u':L', u'=L', u':S', u'>.<',
-          ],
-
-}
+DictionaryProbDist = nltk.probability.DictionaryProbDist
 
 
 class _ClsCache(object):
@@ -171,12 +151,6 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
             for aterm in self._terms_by_root_form[aroot]:
                self._allterms.add(aterm)
 
-      if is_use_emoticons:
-         self._emo_re = {}
-         for emo, pattern in emoticons.items():
-            patterns = [re.escape(i) for i in pattern]
-            self._emo_re[emo] = re.compile(u'|'.join(patterns), re.UNICODE)
-
 
    def _train(self, data):
       train_set = []
@@ -189,13 +163,38 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
       return cls
 
 
+   def _classify_emoticons(self, sent):
+      pos = self.extract_emoticons(sent, 'pos')
+      neg = self.extract_emoticons(sent, 'neg')
+      lpos, lneg = len(pos), len(neg)
+
+      # no emoticons found
+      if lpos+lneg == 0:
+         return DictionaryProbDist({ 'pos': 0, 'neg': 0 })
+
+      # ensure no ZeroDivisionError exceptions will happen
+      pos_prob = 1.0 if lneg==0 else lpos / (lpos+lneg)
+
+      terms_probdist = DictionaryProbDist({ 'pos': pos_prob,
+                                            'neg': 1 - pos_prob })
+
+      if self._verbose:
+         print " - %s: 'pos' probability: %.2f; 'neg' probability: %.2f"\
+                 % ('emoticons',
+                    terms_probdist.prob('pos'),
+                    terms_probdist.prob('neg'))
+
+      return terms_probdist
+
+
+
    def _generic_classify(self, sent, cls, extract_func, what):
       if not cls:
          return None
 
       feats = extract_func(sent)
       if not feats:
-         return NO_CLASS
+         return DictionaryProbDist({ 'pos': 0, 'neg': 0 })
       terms_probdist = cls.prob_classify(feats)
 
       if self._verbose:
@@ -204,7 +203,7 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
                     terms_probdist.prob('pos'),
                     terms_probdist.prob('neg'))
 
-      return terms_probdist#.max()
+      return terms_probdist
 
 
    def _classify_terms(self, sent):
@@ -231,20 +230,31 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
    def _classify(self, sent):
       res = (self._classify_terms(sent),
              self._classify_bigrams(sent),
-             self._classify_trigrams(sent))
+             self._classify_trigrams(sent),
+             self._classify_emoticons(sent))
 
       # only NO_CLASS in res
-      if set(res) == set([NO_CLASS]):
+      if res.count(NO_CLASS) == len(res):
          return NO_CLASS, 1.0
 
       # count mean pos/neg probability
       neg, pos, counter = 0, 0, 0
       for score in res:
-         if score == NO_CLASS:
+         if score is None: # no such classifier
             continue
-         pos += score.prob('pos')
-         neg += score.prob('neg')
+
+         cur_pos, cur_neg = score.prob('pos'), score.prob('neg')
+
+         if cur_pos + cur_neg == 0: # no features provided
+            continue
+
+         pos += cur_pos
+         neg += cur_neg
          counter += 1
+
+      if counter == 0:
+         return NO_CLASS, 1.0
+
       pos = pos / counter
       neg = neg / counter
 
