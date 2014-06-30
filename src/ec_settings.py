@@ -3,6 +3,8 @@
 
 import os.path
 
+POS      = 'pos'
+NEG      = 'neg'
 NO_CLASS = '---'
 
 # pickled versions of the classifiers produced by go to CLS_DUMP_DIR

@@ -17,7 +17,7 @@ import os.path
 from collections import defaultdict
 
 from feature_extraction import FeatureExtraction, emoticons
-from ec_settings import (NO_CLASS,
+from ec_settings import (POS, NEG, NO_CLASS,
                          TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR,
                          TERMS_FN, BIGRAMS_FN, TRIGRAMS_FN,
                          TERMS_BY_ROOT_FORM_FN)
@@ -164,25 +164,25 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
 
 
    def _classify_emoticons(self, sent):
-      pos = self.extract_emoticons(sent, 'pos')
-      neg = self.extract_emoticons(sent, 'neg')
+      pos = self.extract_emoticons(sent, POS)
+      neg = self.extract_emoticons(sent, NEG)
       lpos, lneg = len(pos), len(neg)
 
       # no emoticons found
       if lpos+lneg == 0:
-         return DictionaryProbDist({ 'pos': 0, 'neg': 0 })
+         return DictionaryProbDist({ POS: 0, NEG: 0 })
 
       # ensure no ZeroDivisionError exceptions will happen
       pos_prob = 1.0 if lneg==0 else lpos / (lpos+lneg)
 
-      terms_probdist = DictionaryProbDist({ 'pos': pos_prob,
-                                            'neg': 1 - pos_prob })
+      terms_probdist = DictionaryProbDist({ POS: pos_prob,
+                                            NEG: 1 - pos_prob })
 
       if self._verbose:
-         print " - %s: 'pos' probability: %.2f; 'neg' probability: %.2f"\
+         print " - %s: '%s' probability: %.2f; '%s' probability: %.2f"\
                  % ('emoticons',
-                    terms_probdist.prob('pos'),
-                    terms_probdist.prob('neg'))
+                    POS, terms_probdist.prob(POS),
+                    NEG, terms_probdist.prob(NEG))
 
       return terms_probdist
 
@@ -194,14 +194,14 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
 
       feats = extract_func(sent)
       if not feats:
-         return DictionaryProbDist({ 'pos': 0, 'neg': 0 })
+         return DictionaryProbDist({ POS: 0, NEG: 0 })
       terms_probdist = cls.prob_classify(feats)
 
       if self._verbose:
-         print " - %s: 'pos' probability: %.2f; 'neg' probability: %.2f"\
+         print " - %s: '%s' probability: %.2f; '%s' probability: %.2f"\
                  % (what,
-                    terms_probdist.prob('pos'),
-                    terms_probdist.prob('neg'))
+                    POS, terms_probdist.prob(POS),
+                    NEG, terms_probdist.prob(NEG))
 
       return terms_probdist
 
@@ -243,7 +243,7 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
          if score is None: # no such classifier
             continue
 
-         cur_pos, cur_neg = score.prob('pos'), score.prob('neg')
+         cur_pos, cur_neg = score.prob(POS), score.prob(NEG)
 
          if cur_pos + cur_neg == 0: # no features provided
             continue
@@ -259,9 +259,9 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
       neg = neg / counter
 
       if pos > neg:
-         return 'pos', pos
+         return POS, pos
       elif neg > pos:
-         return 'neg', neg
+         return NEG, neg
       return NO_CLASS, 1.0
 
 
