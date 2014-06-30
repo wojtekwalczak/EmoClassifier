@@ -18,10 +18,9 @@ from collections import defaultdict
 
 from feature_extraction import FeatureExtraction
 from ec_settings import (NO_CLASS,
-                         TERMS_CLS_DIR,
-                         BIGRAMS_CLS_DIR,
-                         TRIGRAMS_CLS_DIR)
-
+                         TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR,
+                         TERMS_FN, BIGRAMS_FN, TRIGRAMS_FN,
+                         TERMS_BY_ROOT_FORM_FN)
 
 
 emoticons = {
@@ -286,10 +285,10 @@ class EmoClassifier(_EmoClassifier):
                         result
 
    """
-   def __init__(self, terms_fn=None,
-                      bigrams_fn=None,
-                      trigrams_fn=None,
-                      terms_by_root_form_fn=None,
+   def __init__(self, terms_fn=TERMS_FN,
+                      bigrams_fn=BIGRAMS_FN,
+                      trigrams_fn=TRIGRAMS_FN,
+                      terms_by_root_form_fn=TERMS_BY_ROOT_FORM_FN,
                       is_use_emoticons=True,
                       is_load_cached_cls=False,
                       is_dump_cls=False,

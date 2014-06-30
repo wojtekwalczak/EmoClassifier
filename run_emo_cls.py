@@ -4,11 +4,7 @@
 from src.emo_cls import EmoClassifier
 
 if __name__ == '__main__':
-   e = EmoClassifier(terms_fn='data/corpuses/terms_raw.csv.gz',
-                     bigrams_fn='data/corpuses/bigrams_raw.csv.gz',
-                     trigrams_fn='data/corpuses/trigrams_raw.csv.gz',
-                     terms_by_root_form_fn='data/terms_by_root_form.msg.gz',
-                     is_use_emoticons=True,
+   e = EmoClassifier(is_use_emoticons=True,
                      is_dump_cls=True,
                      is_load_cached_cls=True)
 
