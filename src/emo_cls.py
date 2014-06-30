@@ -17,7 +17,11 @@ import os.path
 from collections import defaultdict
 
 from feature_extraction import FeatureExtraction
-from ec_settings import TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR
+from ec_settings import (NO_CLASS,
+                         TERMS_CLS_DIR,
+                         BIGRAMS_CLS_DIR,
+                         TRIGRAMS_CLS_DIR)
+
 
 
 emoticons = {
@@ -192,7 +196,7 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
 
       feats = extract_func(sent)
       if not feats:
-         return '---'
+         return NO_CLASS
       terms_probdist = cls.prob_classify(feats)
 
       if self._verbose:
@@ -201,7 +205,7 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
                     terms_probdist.prob('pos'),
                     terms_probdist.prob('neg'))
 
-      return terms_probdist.max()
+      return terms_probdist#.max()
 
 
    def _classify_terms(self, sent):
@@ -226,10 +230,30 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
 
 
    def _classify(self, sent):
-      return (self._classify_terms(sent),
-              self._classify_bigrams(sent),
-              self._classify_trigrams(sent))
+      res = (self._classify_terms(sent),
+             self._classify_bigrams(sent),
+             self._classify_trigrams(sent))
 
+      # only NO_CLASS in res
+      if set(res) == set([NO_CLASS]):
+         return NO_CLASS, 1.0
+
+      # count mean pos/neg probability
+      neg, pos, counter = 0, 0, 0
+      for score in res:
+         if score == NO_CLASS:
+            continue
+         pos += score.prob('pos')
+         neg += score.prob('neg')
+         counter += 1
+      pos = pos / counter
+      neg = neg / counter
+
+      if pos > neg:
+         return 'pos', pos
+      elif neg > pos:
+         return 'neg', neg
+      return NO_CLASS, 1.0
 
 
 

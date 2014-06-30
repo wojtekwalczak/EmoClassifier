@@ -27,4 +27,4 @@ if __name__ == '__main__':
    for sent in example_sents:
       print 'Sentence:', sent
       res = e.classify(sent)
-      print 'Classified as:', res
+      print 'Classified as: %s (%.2f)\n' % res
