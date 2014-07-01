@@ -43,6 +43,15 @@ class TestFeatureExtraction(unittest.TestCase):
                                                     'miec pech, ze przegrac')
 
 
+   def test_extract_emoticons_pos(self):
+      self.assertEqual(fe.extract_emoticons('$$$$:)1111:(xx:Dxx', 'pos'),
+                                            [':)', ':D'])
+
+   def test_extract_emoticons_neg(self):
+      self.assertEqual(fe.extract_emoticons('>.<**):@1111:(xx:Dxx:)', 'neg'),
+                                            ['>.<', ':@', ':('])
+
+
 
 if __name__ == '__main__':
    unittest.main()

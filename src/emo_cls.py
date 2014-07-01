@@ -114,15 +114,24 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
                    is_dump_cls=False,
                    is_load_cached_cls=False):
 
-      terms, self._terms_set = self._csv_to_dict(terms_fn)
-      bigrams, self._bigrams_set = self._csv_to_dict(bigrams_fn)
-      trigrams, self._trigrams_set = self._csv_to_dict(trigrams_fn)
+      # load dictionaries of terms/bigrams/trigrams (first element)
+      # and sets of all terms/bigrams/trigrams
+      if terms_fn:
+         terms, self._terms_set = self._csv_to_dict(terms_fn)
 
+      if bigrams_fn:
+         bigrams, self._bigrams_set = self._csv_to_dict(bigrams_fn)
+
+      if trigrams_fn:
+         trigrams, self._trigrams_set = self._csv_to_dict(trigrams_fn)
+
+      # try to load cached classifiers
       if is_load_cached_cls:
          self.terms_cls = self._load_terms_cls()
          self.bigrams_cls = self._load_bigrams_cls()
          self.trigrams_cls = self._load_trigrams_cls()
 
+      # train classifiers if it didn't work
       if terms_fn and not self.terms_cls:
          self.terms_cls = self._train(terms)
          if is_dump_cls:
@@ -138,6 +147,7 @@ class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
          if is_dump_cls:
             self._dump_trigrams_cls()
 
+      # load dictinary for stemming purposes
       if terms_by_root_form_fn:
          w = gzip.open(terms_by_root_form_fn)
          self._terms_by_root_form = msgpack.unpack(w, encoding='utf-8')
