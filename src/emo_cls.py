@@ -8,11 +8,13 @@ from __future__ import division
 
 import re
 import csv
-import nltk
 import gzip
+import codecs
 import cPickle
 import msgpack
 import os.path
+
+import nltk
 
 from collections import defaultdict
 
@@ -312,7 +314,7 @@ class EmoClassifier(_EmoClassifier):
                       is_use_emoticons=True,
                       is_load_cached_cls=False,
                       is_dump_cls=False,
-                      verbose=True):
+                      verbose=False):
       self._terms_set = None
       self._bigrams_set = None
       self._trigrams_set = None
@@ -320,6 +322,8 @@ class EmoClassifier(_EmoClassifier):
       self.terms_cls = None
       self.bigrams_cls = None
       self.trigrams_cls = None
+
+      self.test_set = None
 
       self._emo_re = None
 
@@ -335,5 +339,38 @@ class EmoClassifier(_EmoClassifier):
                  is_load_cached_cls=is_load_cached_cls)
 
 
+   def load_testset(self, fn):
+      """
+         Load testset from file 'fn'.
+
+         The file format is:
+         label:sentence\n
+         ...
+
+         Returns a generator of tuples: (sentence1, label1), ...
+      """
+      w = codecs.open(fn, 'r', 'utf-8')
+      data = w.read().split('\n')[:-1]
+      w.close()
+
+      # split labels and sentences
+      data = [i.split(':') for i in data]
+      # reverse elements and connect subsentences in case of additional colons
+      self.test_set = [(':'.join(z[1:]), z[0]) for z in data]
+      return self.test_set
+
+
+   def accuracy(self, test_set=None):
+      test_set = test_set if test_set else self.test_set
+      if not test_set:
+         raise Exception("No test set provided!")
+      return nltk.classify.accuracy(self, test_set)
+
+
    def classify(self, sent):
       return self._classify(sent)
+
+
+   def batch_classify(self, sents):
+      for sent in sents:
+         yield self._classify(sent)[0]
