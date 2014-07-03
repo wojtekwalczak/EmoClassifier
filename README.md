@@ -11,6 +11,7 @@ The classification process may result in providing one of three labels:
  - *pos* for positive affinity
  - *neg* for negative affinity
  - *---* for undefined affinity
+
 The *---* label applies only when none of words/emoticons provided in a sentence is recognized by EmoClassifier.
 
 Currently, the corpuses of terms, bigrams and trigrams come from status updates and comments of Facebook users. First, the positive and negative emoticons were defined. Then Facebook status updates and comments containing any of these emoticons were collected (in sum: 250k of positive messages and 250k of negative messages). Based on these messages, the corpuses of terms, bigrams and trigrams were created.

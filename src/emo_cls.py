@@ -398,5 +398,10 @@ class EmoClassifier(_EmoClassifier):
 
 
    def batch_classify(self, sents):
+      """NLTK-2.0 compatibility"""
+      self.classify_many(sent)
+
+
+   def classify_many(self, sents):
       for sent in sents:
          yield self._classify(sent)[0]

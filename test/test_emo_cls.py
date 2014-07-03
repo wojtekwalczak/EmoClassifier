@@ -65,8 +65,8 @@ class TestEmoClassifier(unittest.TestCase):
                                         ])
       ec.trigrams_cls = cls
       res = ec.classify(u'Dostaliśmy duże nagrody')
-      res = (res[0], round(res[1], 2))
-      self.assertEqual(res, (POS, 0.66))
+      res = (res[0], round(res[1], 1))
+      self.assertEqual(res, (POS, 0.6))
 
 
 if __name__ == '__main__':
