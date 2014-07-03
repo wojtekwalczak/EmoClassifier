@@ -301,10 +301,17 @@ class EmoClassifier(_EmoClassifier):
        terms_cls   - terms classifier
        bigrams_cls - bigrams classifier
        trigrams    - trigrams classifier
+       test_set    - a list of tuples containing sentences and labels
+
 
       Class methods:
-       classify(sent) - classify sentence 'sent'. Return the classification
-                        result
+       classify(sent)     - classify sentence 'sent'. Return the classification
+                            result
+       accuracy(test_set) - return accuracy measure for test_set (if not set,
+                            check self.test_set)
+       print_confusion_matrix(gold, test) - given two lists of labels (gold
+                                            and test) return confusion matrix
+       load_test_set(fn) - load test set from file 'fn'
 
    """
    def __init__(self, terms_fn=TERMS_FN,
@@ -339,6 +346,20 @@ class EmoClassifier(_EmoClassifier):
                  is_load_cached_cls=is_load_cached_cls)
 
 
+   @property
+   def test_set_labels(self):
+      if not self.test_set:
+         return []
+      return [i[1] for i in self.test_set]
+
+
+   @property
+   def test_set_sents(self):
+      if not self.test_set:
+         return []
+      return [i[0] for i in self.test_set]
+
+
    def load_testset(self, fn):
       """
          Load testset from file 'fn'.
@@ -365,6 +386,11 @@ class EmoClassifier(_EmoClassifier):
       if not test_set:
          raise Exception("No test set provided!")
       return nltk.classify.accuracy(self, test_set)
+
+
+   def print_confusion_matrix(self, gold, test):
+      cm = nltk.ConfusionMatrix(gold, test)
+      print cm.pp()
 
 
    def classify(self, sent):

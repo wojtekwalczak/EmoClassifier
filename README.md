@@ -77,11 +77,26 @@ if __name__ == '__main__':
    e = EmoClassifier(is_load_cached_cls=True)
 
    e.load_testset('data/testsets/test1.txt')
-   print e.accuracy()
+   print 'Accuracy: %s\n' % (e.accuracy())
+
+   print 'Confusion matrix:'
+   test_labels = [e.classify(sent)[0] for sent in e.test_set_sents]
+   e.print_confusion_matrix(e.test_set_labels, test_labels)
 ```
 
 Output:
 
 ```
 0.818181818182
+
+Confusion matrix:
+    |  -  n  p |
+    |  -  e  o |
+    |  -  g  s |
+----+----------+
+--- | <1> .  . |
+neg |  .<24> . |
+pos |  .  6<19>|
+----+----------+
+(row = reference; col = test)
 ```
