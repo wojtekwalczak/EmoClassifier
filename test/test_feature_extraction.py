@@ -18,8 +18,8 @@ class TestFeatureExtraction(unittest.TestCase):
 
 
    def test_reduce_extended_chars(self):
-      self.assertEqual(fe._reduce_extended_chars('Hurraaaaa wygraaaaliiii'),
-                                                             'Hurra wygrali')
+      self.assertEqual(fe._reduce_extended_chars('Hurraaaaa hehe hiehie'),
+                                                             'Hura he hie')
 
    def test_stem_term(self):
       fe._terms_by_root_form = { 'wygrac': ('wygrali', ) }

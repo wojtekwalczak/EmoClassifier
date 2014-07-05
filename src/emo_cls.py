@@ -91,8 +91,9 @@ class _ReadCorpus(object):
       raw_data = self._read_csv(fn)
       data = defaultdict(lambda: defaultdict(int))
       for aline in raw_data:
-         emo, term, freq = aline
-         data[emo][term] = freq
+         term, pos_freq, neg_freq = aline
+         data[POS][term] = pos_freq
+         data[NEG][term] = neg_freq
          terms.add(term)
       return data, terms
 

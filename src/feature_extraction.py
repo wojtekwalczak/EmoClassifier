@@ -78,7 +78,7 @@ class _FeatureExtraction(object):
 
    def _stem_term(self, term_raw):
       aterm = term_raw.lower().strip()
-      if len(aterm) < 3:
+      if len(aterm) < 4:
          return aterm
       if aterm in self._terms_by_root_form:
          return aterm
@@ -102,23 +102,18 @@ class _FeatureExtraction(object):
    def _reduce_extended_chars(self, sent):
       """
          Reduce "extended" characters in a sentence. "Extended" means
-         three or more consecutive occurrences of the same character
+         two or more consecutive occurrences of the same character
          in a word.
 
          Return the reduced string.
 
          For example:
 
-         >>> re.sub(r"(.)\1{2,100}", r"\1", "Hurrrrra wygraaaaaliiiii")
-         'Hura wygrali'
-
-         This solution is not perfect as it (on purpose) doesn't
-         reduce two identical consecutive chars to a single char:
-
-         >>> re.sub(r"(.)\1{2,100}", r"\1", "Hurra wygraaaaaliiiii")
-         'Hurra wygrali'
+         >>> a = 'Hurraaaaaa hehehe  hiehiehie'
+         >>> re.sub(r"(.|..|...)\1{1,100}", r"\1", a)
+         'Hura he hie'
       """
-      return re.sub(r"(.)\1{2,100}", r"\1", sent)
+      return re.sub(r"(.|..|...)\1{1,100}", r"\1", sent)
 
 
 class FeatureExtraction(_FeatureExtraction):
