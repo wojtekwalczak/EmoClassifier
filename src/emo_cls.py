@@ -7,20 +7,16 @@
 from __future__ import division
 
 import re
-import csv
 import gzip
 import codecs
-import cPickle
 import msgpack
-import os.path
 
 import nltk
 
-from collections import defaultdict
-
 from feature_extraction import FeatureExtraction, emoticons
+from cls_cache import ClsCache
+from corpus_reader import CorpusReader
 from ec_settings import (POS, NEG, NO_CLASS,
-                         TERMS_CLS_DIR, BIGRAMS_CLS_DIR, TRIGRAMS_CLS_DIR,
                          TERMS_FN, BIGRAMS_FN, TRIGRAMS_FN,
                          TERMS_BY_ROOT_FORM_FN)
 
@@ -28,88 +24,7 @@ from ec_settings import (POS, NEG, NO_CLASS,
 DictionaryProbDist = nltk.probability.DictionaryProbDist
 
 
-class _ClsCache(object):
-
-   def _dump_cls(self, cls, fn):
-      """
-         Dump the classifier 'cls' to a pickle named 'fn'.
-      """
-      w = gzip.open(fn, 'wb')
-      cPickle.dump(cls, w, 1)
-      w.close()
-
-   def _dump_terms_cls(self, fn=TERMS_CLS_DIR):
-      self._dump_cls(self.terms_cls, fn)
-
-   def _dump_bigrams_cls(self, fn=BIGRAMS_CLS_DIR):
-      self._dump_cls(self.bigrams_cls, fn)
-
-   def _dump_trigrams_cls(self, fn=TRIGRAMS_CLS_DIR):
-      self._dump_cls(self.trigrams_cls, fn)
-
-
-   def _load_cls(self, fn):
-      if not os.path.exists(fn):
-         return None
-      w = gzip.open(fn, 'rb')
-      cls = cPickle.load(w)
-      w.close()
-      return cls
-
-   def _load_terms_cls(self, fn=TERMS_CLS_DIR):
-      return self._load_cls(fn)
-
-   def _load_bigrams_cls(self, fn=BIGRAMS_CLS_DIR):
-      return self._load_cls(fn)
-
-   def _load_trigrams_cls(self, fn=TRIGRAMS_CLS_DIR):
-      return self._load_cls(fn)
-
-
-class _ReadCorpus(object):
-
-   def _csv_to_dict(self, fn):
-      """
-         Read in the contents of a CSV file and place the contents
-         in a dict of dicts.
-
-         The CSV file is supposed to be of a form:
-
-         val_1,val_2,val_3
-
-         where:
-          - 'val_1' is a type of emotion ('pos'/'neg')
-          - 'val_2' is a term (bigram/trigram etc.)
-          - 'val_3' is a frequency of occurence of 'val_2'
-            in the context of 'val_1'
-
-         Return a tuple of two values:
-          - a dict of dicts: adict[val_1][val_2] = val_3
-          - a tuple of all val_2s (ie. terms/bigrams/trigrams)
-      """
-      terms = set([])
-      raw_data = self._read_csv(fn)
-      data = defaultdict(lambda: defaultdict(int))
-      for aline in raw_data:
-         term, pos_freq, neg_freq = aline
-         data[POS][term] = pos_freq
-         data[NEG][term] = neg_freq
-         terms.add(term)
-      return data, terms
-
-
-   def _read_csv(self, fn):
-      csv_f = gzip.open(fn)
-      csv_reader = csv.reader(csv_f)
-      data = []
-      for arow in csv_reader:
-         data.append(arow)
-      csv_f.close()
-      return data
-
-
-
-class _EmoClassifier(FeatureExtraction, _ClsCache, _ReadCorpus):
+class _EmoClassifier(FeatureExtraction, ClsCache, CorpusReader):
 
    def _init(self, terms_fn=None, bigrams_fn=None, trigrams_fn=None,
                    terms_by_root_form_fn=None,
