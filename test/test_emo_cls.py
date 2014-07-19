@@ -3,7 +3,8 @@
 
 import unittest
 
-from nltk import NaiveBayesClassifier
+import nltk
+NaiveBayesClassifier = nltk.NaiveBayesClassifier
 
 from src.emo_cls import EmoClassifier
 from src.ec_settings import POS, NEG, NO_CLASS
@@ -66,8 +67,11 @@ class TestEmoClassifier(unittest.TestCase):
       ec.trigrams_cls = cls
       res = ec.classify(u'Dostaliśmy duże nagrody')
       res = (res[0], round(res[1], 1))
-      self.assertEqual(res, (POS, 0.6))
 
+      if nltk.version_info.major == 2:
+         self.assertEqual(res, (POS, 0.7))
+      else:
+         self.assertEqual(res, (POS, 0.6))
 
 if __name__ == '__main__':
    unittest.main()
