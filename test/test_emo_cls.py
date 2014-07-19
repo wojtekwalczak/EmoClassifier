@@ -68,7 +68,7 @@ class TestEmoClassifier(unittest.TestCase):
       res = ec.classify(u'Dostaliśmy duże nagrody')
       res = (res[0], round(res[1], 1))
 
-      if nltk.version_info.major == 2:
+      if nltk.__version__[0] == '2':
          self.assertEqual(res, (POS, 0.7))
       else:
          self.assertEqual(res, (POS, 0.6))
